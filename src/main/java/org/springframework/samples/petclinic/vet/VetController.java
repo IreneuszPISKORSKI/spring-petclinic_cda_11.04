@@ -15,6 +15,7 @@
  */
 package org.springframework.samples.petclinic.vet;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -74,5 +76,23 @@ class VetController {
 		vets.getVetList().addAll(this.vetRepository.findAll());
 		return vets;
 	}
+
+	@GetMapping("/vets/{specialtyName}")
+	public @ResponseBody Collection<Vet> getVetsBySpeciality(@PathVariable("specialtyName") String specialtyName) {
+		Collection<Vet> theVets = this.vetRepository.findAll();
+
+		Collection<Vet> vetInSpecialityList = theVets
+			.stream()
+			.filter(vet -> vet
+				.getSpecialties()
+				.stream()
+				.anyMatch(specialty -> specialty
+					.getName()
+					.equalsIgnoreCase(specialtyName)))
+			.toList();
+
+		return  vetInSpecialityList;
+	}
+
 
 }

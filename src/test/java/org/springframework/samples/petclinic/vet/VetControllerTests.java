@@ -17,6 +17,8 @@
 package org.springframework.samples.petclinic.vet;
 
 import org.assertj.core.util.Lists;
+import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
@@ -30,6 +32,10 @@ import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -97,4 +103,24 @@ class VetControllerTests {
 			.andExpect(jsonPath("$.vetList[0].id").value(1));
 	}
 
+	@Test
+	void findVetBySpeciality(){
+
+		String speciality_to_find = "radiology";
+
+		Collection<Vet> theVets = this.vets.findAll();
+
+		Collection<Vet> vetInSpecialityList = theVets
+			.stream()
+			.filter(vet -> vet
+				.getSpecialties()
+				.stream()
+				.anyMatch(specialty -> specialty
+					.getName()
+					.equalsIgnoreCase(speciality_to_find)))
+			.toList();
+
+        Assertions.assertTrue(vetInSpecialityList.stream().anyMatch(vet -> vet.getSpecialties().get(0).getName().equals("radiology")));
+
+	}
 }
